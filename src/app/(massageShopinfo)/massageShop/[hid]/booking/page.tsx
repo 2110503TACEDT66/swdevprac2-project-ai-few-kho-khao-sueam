@@ -33,7 +33,7 @@ export default function Bookings({ params }: { params: { hid: string } }) {
                     'Authorization': `Bearer ${session?.user.token}` // Pass the user token for authentication
                 },
                 body: JSON.stringify({
-                    bookingDate: bookingDate ? bookingDate.format("YYYY/MM/DD") : "",
+                    bookingDate: bookingDate ? bookingDate.format("lll") : "",
                     user: session?.user._id,
                     massageShop: massageShopDetail
                 })
@@ -43,7 +43,7 @@ export default function Bookings({ params }: { params: { hid: string } }) {
             if (res.ok) {
                 const data = await res.json();
                 console.log("Booking created:", data);
-                
+                alert('booking complete')
                 // Handle successful booking creation here (e.g., show a success message)
             } else {
                 // Handle error response from the server
@@ -51,7 +51,7 @@ export default function Bookings({ params }: { params: { hid: string } }) {
                 console.error("Error creating booking:", errorData);
                 // Display an error message to the user
             }
-            alert('booking')
+            
         } catch (error) {
             console.error("Error creating booking:", error);
             // Display an error message to the user

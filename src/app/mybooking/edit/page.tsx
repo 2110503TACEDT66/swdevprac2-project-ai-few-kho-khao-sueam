@@ -7,21 +7,31 @@ import { useEffect } from "react";
 import getMassageShop from "@/libs/getMassageShop";
 import { useSearchParams } from "next/navigation";
 
-export default function Edit({ params }: { params: { hid: string } }) {
+export default function Edit() {
     const urlParams = useSearchParams();
     const bookingId = urlParams.get("id");
+    const massageShopID = urlParams.get("hid");
     const [bookingDate, setBookingDate] = useState<Dayjs | null>(null);
     const { data: session } = useSession();
     const [massageShopDetail, setMassgeShopDetail] = useState<any>(null);
 
     useEffect(() => {
         const fetchData = async () => {
-          const massageData = await getMassageShop(params.hid);
-          setMassgeShopDetail(massageData);
+            try {
+                const response = await fetch(`http://localhost:5001/api/v1/massageShops/${massageShopID}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch massage shop data');
+                }
+                const massageData = await response.json();
+                setMassgeShopDetail(massageData);
+            } catch (error) {
+                console.error("Error fetching massage shop data:", error);
+            }
         };
     
         fetchData();
-      }, [params.hid]);
+    }, [massageShopID]);
+    
 
     // Function to handle form submission
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -36,30 +46,36 @@ export default function Edit({ params }: { params: { hid: string } }) {
                     'Authorization': `Bearer ${session?.user.token}` // Pass the user token for authentication
                 },
                 body: JSON.stringify({
-                    bookingDate: bookingDate ? bookingDate.format("YYYY/MM/DD") : "",
+                    bookingDate: bookingDate ? bookingDate.format("lll") : "",
                     user: session?.user._id,
-                    massageShop: massageShopDetail
+                    massageShop: massageShopID
                 })
             });
+
 
             // Check if the request was successful
             if (res.ok) {
                 const data = await res.json();
                 console.log("Booking updated:", data);
-                
+                alert('Update')
                 // Handle successful booking creation here (e.g., show a success message)
             } else {
                 // Handle error response from the server
                 const errorData = await res.json();
                 console.error("Error updating booking:", errorData);
+                alert('Cant Update')
                 // Display an error message to the user
             }
-            alert('Update')
+            
         } catch (error) {
             console.error("Error updating booking:", error);
             // Display an error message to the user
         }
     };
+
+    console.log(massageShopDetail);
+    console.log(bookingDate);
+    console.log(bookingId);
 
     return (
         <main className="w-[100%] flex flex-col items-center space-y-4">
@@ -74,9 +90,9 @@ export default function Edit({ params }: { params: { hid: string } }) {
                 </div>
 
                 <button className="block rounded-md bg-sky-600 hover:bg-indigo-600 px-3 py-2 text-white shadow-sm"
-                    name="Book Vaccine"
+                    name="Update Booking"
                     type="submit"> {/* Change onClick to type="submit" */}
-                    Update Booking
+                    Update
                 </button>
             </form>
         </main>
